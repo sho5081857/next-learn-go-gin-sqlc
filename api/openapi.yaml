@@ -1,0 +1,703 @@
+openapi: 3.0.3
+info:
+  title: Learn Next Dashboard API
+  version: 1.0.0
+servers:
+  - url: http://0.0.0.0:8080/api/v1
+  - url: http://localhost:8080/api/v1
+  - url: http://127.0.0.1:8080/api/v1
+security:
+  - BearerAuth: []
+paths:
+  /register:
+    post:
+      tags:
+        - user
+      summary: Register a new user
+      operationId: registerUser
+      security: []
+      requestBody:
+        $ref: "#/components/requestBodies/CreateUserRequestBody"
+        required: true
+      responses:
+        "201":
+          $ref: "#/components/responses/UserResponse"
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+  /login:
+    post:
+      tags:
+        - user
+      summary: Login a user
+      operationId: loginUser
+      security: []
+      requestBody:
+        $ref: "#/components/requestBodies/LoginUserRequestBody"
+        required: true
+      responses:
+        "200":
+          $ref: "#/components/responses/LoginResponse"
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+  /invoices:
+    post:
+      tags:
+        - invoice
+      summary: Create a new invoice
+      operationId: createInvoice
+      requestBody:
+        $ref: "#/components/requestBodies/CreateInvoiceRequestBody"
+        required: true
+      responses:
+        "201":
+          $ref: "#/components/responses/InvoiceResponse"
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+  /invoices/latest:
+    get:
+      tags:
+        - invoice
+      summary: Get latest invoices
+      operationId: getLatestInvoicesList
+      responses:
+        "200":
+          $ref: "#/components/responses/LatestInvoicesListResponse"
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+  /invoices/filtered:
+    get:
+      tags:
+        - invoice
+      summary: Get filtered invoices
+      operationId: getFilteredInvoicesList
+      parameters:
+        - name: query
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          $ref: "#/components/responses/FilteredInvoicesListResponse"
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+  /invoices/count:
+    get:
+      tags:
+        - invoice
+      summary: Get all invoices count
+      operationId: getAllInvoicesCount
+      responses:
+        "200":
+          $ref: "#/components/responses/AllInvoicesCountResponse"
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+  /invoices/status/count:
+    get:
+      tags:
+        - invoice
+      summary: Get all invoices status count
+      operationId: getAllInvoicesStatusCount
+      responses:
+        "200":
+          $ref: "#/components/responses/InvoicesStatusCountResponse"
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+  /invoices/{id}:
+    get:
+      tags:
+        - invoice
+      summary: Find an invoice by ID
+      operationId: getInvoiceById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          $ref: "#/components/responses/InvoiceResponse"
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+        "404":
+          $ref: "#/components/responses/ErrorResponse"
+    patch:
+      tags:
+        - invoice
+      summary: Update an invoice by ID
+      operationId: updateInvoiceById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        $ref: "#/components/requestBodies/UpdateInvoiceByIdRequestBody"
+        required: true
+      responses:
+        "200":
+          $ref: "#/components/responses/InvoiceResponse"
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+        "404":
+          $ref: "#/components/responses/ErrorResponse"
+    delete:
+      tags:
+        - invoice
+      summary: Delete an invoice by ID
+      operationId: deleteInvoiceById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: No Content
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+        "404":
+          $ref: "#/components/responses/ErrorResponse"
+  /revenues:
+    get:
+      tags:
+        - revenue
+      summary: Get all revenue
+      operationId: getAllRevenueList
+      responses:
+        "200":
+          $ref: "#/components/responses/AllRevenueListResponse"
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+  /customers:
+    get:
+      tags:
+        - customer
+      summary: Get all customers
+      operationId: getAllCustomersList
+      responses:
+        "200":
+          $ref: "#/components/responses/AllCustomersListResponse"
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+  /customers/filtered:
+    get:
+      tags:
+        - customer
+      summary: Get filtered customers
+      operationId: getFilteredCustomersList
+      parameters:
+        - name: query
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          $ref: "#/components/responses/FilteredCustomersListResponse"
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+  /customers/count:
+    get:
+      tags:
+        - customer
+      summary: Get all customers count
+      operationId: getAllCustomersCount
+      responses:
+        "200":
+          $ref: "#/components/responses/AllCustomersCountResponse"
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ApiVersion:
+      type: string
+      default: "v1"
+    Date:
+      type: string
+      format: date
+    InvoiceStatus:
+      type: string
+      enum:
+        - paid
+        - pending
+    Invoice:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        customer_id:
+          type: string
+          format: uuid
+        amount:
+          type: integer
+        status:
+          $ref: "#/components/schemas/InvoiceStatus"
+        date:
+          $ref: "#/components/schemas/Date"
+      required:
+        - id
+        - customer_id
+        - amount
+        - status
+        - date
+    LatestInvoice:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        image_url:
+          type: string
+        email:
+          type: string
+        amount:
+          type: integer
+      required:
+        - id
+        - name
+        - image_url
+        - email
+        - amount
+    FilteredInvoice:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        customer_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        image_url:
+          type: string
+        email:
+          type: string
+        amount:
+          type: integer
+        date:
+          $ref: "#/components/schemas/Date"
+        status:
+          $ref: "#/components/schemas/InvoiceStatus"
+      required:
+        - id
+        - name
+        - image_url
+        - email
+        - amount
+        - date
+        - status
+    InvoicesCount:
+      type: object
+      properties:
+        total:
+          type: integer
+      required:
+        - total
+    InvoicesStatusCount:
+      type: object
+      properties:
+        paid:
+          type: integer
+        pending:
+          type: integer
+      required:
+        - paid
+        - pending
+    AllRevenue:
+      type: object
+      properties:
+        month:
+          type: string
+        revenue:
+          type: integer
+      required:
+        - month
+        - revenue
+    AllCustomer:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+      required:
+        - id
+        - name
+    FilteredCustomer:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        total_invoices:
+          type: integer
+        total_pending:
+          type: integer
+        total_paid:
+          type: integer
+      required:
+        - id
+        - name
+        - email
+        - total_invoices
+        - total_pending
+        - total_paid
+    AllCustomerCount:
+      type: object
+      properties:
+        total:
+          type: integer
+      required:
+        - total
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+      required:
+        - id
+        - name
+        - email
+    CreateUser:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+      required:
+        - id
+        - name
+        - email
+    LoginUser:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        token:
+          type: string
+      required:
+        - id
+        - email
+        - token
+    CreateInvoiceRequest:
+      type: object
+      properties:
+        customer_id:
+          type: string
+          format: uuid
+        amount:
+          type: integer
+        status:
+          $ref: "#/components/schemas/InvoiceStatus"
+        date:
+          $ref: "#/components/schemas/Date"
+      required:
+        - customer_id
+        - amount
+        - status
+        - date
+    UpdateInvoiceByIdRequest:
+      type: object
+      properties:
+        customer_id:
+          type: string
+          format: uuid
+        amount:
+          type: integer
+        status:
+          $ref: "#/components/schemas/InvoiceStatus"
+        date:
+          $ref: "#/components/schemas/Date"
+    CreateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - name
+        - email
+        - password
+    LoginUserRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          default: "password"
+      required:
+        - email
+        - password
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+        code:
+          type: integer
+      required:
+        - message
+        - code
+  requestBodies:
+    CreateInvoiceRequestBody:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CreateInvoiceRequest"
+    UpdateInvoiceByIdRequestBody:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UpdateInvoiceByIdRequest"
+    CreateUserRequestBody:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CreateUserRequest"
+    LoginUserRequestBody:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/LoginUserRequest"
+  responses:
+    InvoiceResponse:
+      description: Invoice response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              apiVersion:
+                $ref: "#/components/schemas/ApiVersion"
+              data:
+                $ref: "#/components/schemas/Invoice"
+            required:
+              - apiVersion
+
+              - data
+    LatestInvoicesListResponse:
+      description: Get latest invoice list response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              apiVersion:
+                $ref: "#/components/schemas/ApiVersion"
+              items:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LatestInvoice"
+            required:
+              - apiVersion
+
+              - items
+    FilteredInvoicesListResponse:
+      description: Get filtered invoice list response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              apiVersion:
+                $ref: "#/components/schemas/ApiVersion"
+              totalItems:
+                type: integer
+              items:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FilteredInvoice"
+            required:
+              - apiVersion
+              - totalItems
+              - items
+    AllInvoicesCountResponse:
+      description: Get all invoices count response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              apiVersion:
+                $ref: "#/components/schemas/ApiVersion"
+              data:
+                $ref: "#/components/schemas/InvoicesCount"
+            required:
+              - apiVersion
+              - data
+    InvoicesStatusCountResponse:
+      description: Get invoice status count response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              apiVersion:
+                $ref: "#/components/schemas/ApiVersion"
+              data:
+                $ref: "#/components/schemas/InvoicesStatusCount"
+            required:
+              - apiVersion
+              - data
+    AllRevenueListResponse:
+      description: Get all revenue list response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              apiVersion:
+                $ref: "#/components/schemas/ApiVersion"
+              items:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AllRevenue"
+            required:
+              - apiVersion
+              - items
+    AllCustomersListResponse:
+      description: Get all customer list response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              apiVersion:
+                $ref: "#/components/schemas/ApiVersion"
+              items:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AllCustomer"
+            required:
+              - apiVersion
+              - items
+    FilteredCustomersListResponse:
+      description: Get filtered customer list response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              apiVersion:
+                $ref: "#/components/schemas/ApiVersion"
+              items:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FilteredCustomer"
+            required:
+              - apiVersion
+              - items
+    AllCustomersCountResponse:
+      description: Get customer count response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              apiVersion:
+                $ref: "#/components/schemas/ApiVersion"
+              data:
+                $ref: "#/components/schemas/AllCustomerCount"
+            required:
+              - apiVersion
+              - data
+    UserResponse:
+      description: User response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              apiVersion:
+                $ref: "#/components/schemas/ApiVersion"
+              data:
+                $ref: "#/components/schemas/User"
+            required:
+              - apiVersion
+              - data
+    CreateUserResponse:
+      description: Create user response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              apiVersion:
+                $ref: "#/components/schemas/ApiVersion"
+              data:
+                $ref: "#/components/schemas/CreateUser"
+            required:
+              - apiVersion
+              - data
+    LoginResponse:
+      description: Login response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              apiVersion:
+                $ref: "#/components/schemas/ApiVersion"
+              data:
+                $ref: "#/components/schemas/LoginUser"
+            required:
+              - apiVersion
+              - data
+    ErrorResponse:
+      description: Error response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                $ref: "#/components/schemas/Error"
+            required:
+              - error
